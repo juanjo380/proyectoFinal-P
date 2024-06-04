@@ -2,7 +2,7 @@ import pygame
 from pygame import mixer
 from pygame.locals import *
 import random
-from entidades import jugador,enemigo1,enemigo2,enemigo3,enemigo4 #similar a importar una clase de C++
+from entidades import jugador,enemigo1,enemigo2,enemigo3,enemigo4 
 
 anchoVentana = 600
 altoVentana = 700

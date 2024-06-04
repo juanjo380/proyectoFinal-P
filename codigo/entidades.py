@@ -76,11 +76,13 @@ class Enemigo(Entidad):
         super().__init__(x=random.randint(0, anchoPantalla - ancho), y=0, velocidad=5, vida=100)  # Llama al constructor de la clase base
         imagenOriginal = pygame.image.load(imagenPath)
         self.imagen = pygame.transform.scale(imagenOriginal, (ancho, alto))
-        self.ancho = ancho
-        self.alto = alto
+        self.rect = self.imagen.get_rect()
+        self.rect.x = random.randrange(anchoPantalla - self.rect.width)
+        self.rect.y = random.randrange(-100, -40)
+        self.velocidady = random.randrange(1, 10)
 
     def mover(self):
-        self.y += self.velocidad
+        self.rect.y += self.velocidady
 
 # Instancias de enemigos
 enemigo1 = Enemigo("./texturas/enemigo1.png", 100, 100)

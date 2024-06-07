@@ -12,6 +12,8 @@ nuevoAlto = 100
 anchoPantalla = 800
 altoPantalla = 600
 
+intervalo_disparo = 500  # Intervalo de tiempo entre disparos en milisegundos
+
 #-------------------------------------------
 # Clase base Entidad
 class Entidad(pygame.sprite.Sprite):
@@ -33,10 +35,10 @@ class Entidad(pygame.sprite.Sprite):
 class Proyectil(Entidad):
     def __init__(self, x, y):
         super().__init__(x, y, velocidad=7, vida=1)  # Llama al constructor de la clase base
-        self.ancho = nuevoAncho
-        self.alto = nuevoAlto
+        self.ancho = nuevoAncho //2
+        self.alto = nuevoAlto //2
         self.imagen = pygame.image.load("./texturas/proyectil1.png")
-        self.ancho = self.imagen.get_width()
+        self.imagen = pygame.transform.scale(self.imagen, (self.ancho, self.alto))
 
     def mover(self):
         self.y -= self.velocidad
@@ -45,7 +47,6 @@ class Proyectil(Entidad):
         proyectilRect = pygame.Rect(self.x, self.y, self.ancho, self.alto)
         enemigoRect = pygame.Rect(enemigo.x, enemigo.y, enemigo.ancho, enemigo.alto)
         return proyectilRect.colliderect(enemigoRect)
-
 
 #-------------------------------------------
 
@@ -58,19 +59,20 @@ class Jugador(Entidad):
         self.ancho = self.imagen.get_width()
         self.alto = self.imagen.get_height()
         self.proyectiles = []  # Composición: el jugador tiene una lista de proyectiles
-        self.puedeDisparar = True
+        self.ultimo_disparo = pygame.time.get_ticks()
 
     def disparar(self):
-        if self.puedeDisparar:
+        tiempo_actual = pygame.time.get_ticks()
+        if tiempo_actual - self.ultimo_disparo > intervalo_disparo:
             proyectil = Proyectil(self.x + self.ancho // 2 - 10, self.y)
             self.proyectiles.append(proyectil)
-            self.puedeDisparar = False
+            self.ultimo_disparo = tiempo_actual
                 
     def mover(self):
         teclas = pygame.key.get_pressed()
-        if teclas[K_LEFT]:
+        if teclas[K_LEFT] and self.x > 0:
             self.x -= self.velocidad
-        if teclas[K_RIGHT]:
+        if teclas[K_RIGHT] and self.x < anchoPantalla - self.ancho:
             self.x += self.velocidad
 
 # Instancia del jugador
@@ -79,7 +81,6 @@ jugador.vida = 150
 
 #-------------------------------------------
 
-# Clase Enemigo que hereda de Entidad
 # Clase Enemigo que hereda de Entidad
 class Enemigo(Entidad):
     def __init__(self, x, y, imagenPath, velocidad, vida):

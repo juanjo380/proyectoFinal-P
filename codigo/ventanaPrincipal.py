@@ -3,10 +3,10 @@ from pygame import mixer
 from pygame.locals import *
 import random
 from entidades import jugador, enemigos
-from menu import Menu  # Asegúrate de importar la clase Menu
+from menu import Menu
 
-anchoVentana = 600
-altoVentana = 700
+anchoVentana = 800
+altoVentana = 800
 
 # Inicializar Pygame
 pygame.init()
@@ -21,9 +21,30 @@ x = 0
 # Instancia del menú
 menu = Menu(anchoVentana, altoVentana)
 
+
 # Variables de estado
 enMenu = True
+en_como_jugar = False
 correr = True
+
+# Función para mostrar la pantalla de "Cómo Jugar"
+def mostrarComoJugar(ventana):
+    ventana.fill((0, 0, 0))
+    fuente = pygame.font.Font(None, 40)
+    instrucciones = [
+        "Como Jugar Space Invaders:",
+        "1. Usa las flechas izquierda y derecha para mover tu nave.",
+        "2. Presiona la barra espaciadora para disparar.",
+        "3. Destruye a los enemigos antes de que lleguen a la parte inferior.",
+        "4. Evita los proyectiles enemigos.",
+        "",
+        "Presiona Enter para volver al menú principal."
+    ]
+    for i, linea in enumerate(instrucciones):
+        texto = fuente.render(linea, True, (255, 255, 255))
+        rect = texto.get_rect(center=(anchoVentana / 2, 100 + i * 40))
+        ventana.blit(texto, rect)
+    pygame.display.update()
 
 # similar a la funcion main() de C++
 correrCodigo = True
@@ -37,24 +58,32 @@ while correrCodigo:
         elif event.type == KEYDOWN:
             if enMenu:
                 if event.key == K_UP:
-                    menu.mover_seleccion(-1)
+                    menu.moverSeleccion(-1)
                 elif event.key == K_DOWN:
-                    menu.mover_seleccion(1)
+                    menu.moverSeleccion(1)
                 elif event.key == K_RETURN:
-                    opcion = menu.obtener_opcion()
+                    opcion = menu.obtenerOpcion()
                     if opcion == "Iniciar Juego":
                         enMenu = False
                     elif opcion == "Cómo Jugar":
-                        print("Mostrar pantalla de cómo jugar")  # Implementar según se desee
+                        enMenu = False
+                        en_como_jugar = True  # Cambia al estado de "Cómo Jugar"
                     elif opcion == "Salir":
                         run = False
                         correrCodigo = False  # Asegúrate de salir del bucle principal
+            elif en_como_jugar:
+                if event.key == K_RETURN:
+                    en_como_jugar = False
+                    enMenu = True  # Vuelve al menú principal
             else:
                 if event.key == K_SPACE:
                     jugador.disparar()
 
+    ventana.fill((0, 0, 0))  # Limpiar la ventana
     if enMenu:
         menu.dibujar(ventana)
+    elif en_como_jugar:
+        mostrarComoJugar(ventana)
     else:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
@@ -76,7 +105,7 @@ while correrCodigo:
                 jugador.puedeDisparar = True
             for enemigo in enemigos:
                 if proyectil.colisiona(enemigo):
-                    if enemigo.recibirDano(10):
+                    if enemigo.recibirDano(50):
                         enemigos.remove(enemigo)
                     jugador.proyectiles.remove(proyectil)
                     break

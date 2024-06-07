@@ -24,8 +24,10 @@ class Entidad(pygame.sprite.Sprite):
 
     def recibirDano(self, cantidad):
         self.vida -= cantidad
-        if self.vida < 0:
+        if self.vida <= 0:
             self.vida = 0
+            return True
+        return False
 
 # Clase Proyectil que hereda de Entidad
 class Proyectil(Entidad):
@@ -44,12 +46,13 @@ class Proyectil(Entidad):
         enemigoRect = pygame.Rect(enemigo.x, enemigo.y, enemigo.ancho, enemigo.alto)
         return proyectilRect.colliderect(enemigoRect)
 
+
 #-------------------------------------------
 
 # Clase Jugador que hereda de Entidad
 class Jugador(Entidad):
     def __init__(self, imagenPath):
-        super().__init__(x=300, y=500, velocidad=2, vida=100)  # Llama al constructor de la clase base
+        super().__init__(x=300, y=500, velocidad=5, vida=100)  # Llama al constructor de la clase base
         imagenOriginal = pygame.image.load(imagenPath)
         self.imagen = pygame.transform.scale(imagenOriginal, (nuevoAncho, nuevoAlto))
         self.ancho = self.imagen.get_width()
@@ -59,7 +62,7 @@ class Jugador(Entidad):
 
     def disparar(self):
         if self.puedeDisparar:
-            proyectil = Proyectil(self.x + 20, self.y)
+            proyectil = Proyectil(self.x + self.ancho // 2 - 10, self.y)
             self.proyectiles.append(proyectil)
             self.puedeDisparar = False
                 
@@ -77,6 +80,7 @@ jugador.vida = 150
 #-------------------------------------------
 
 # Clase Enemigo que hereda de Entidad
+# Clase Enemigo que hereda de Entidad
 class Enemigo(Entidad):
     def __init__(self, x, y, imagenPath, velocidad, vida):
         super().__init__(x, y, velocidad, vida)  # Llama al constructor de la clase base
@@ -91,6 +95,10 @@ class Enemigo(Entidad):
         if self.x <= 0 or self.x + self.ancho >= anchoPantalla:
             self.direccion *= -1
             self.y += self.alto  # Mueve al enemigo hacia abajo cuando cambia de dirección
+            if self.x < 0:
+                self.x = 0
+            if self.x + self.ancho > anchoPantalla:
+                self.x = anchoPantalla - self.ancho
 
 #-------------------------------------------
 
@@ -108,4 +116,4 @@ def crearFormacionEnemigos(filas, columnas, imagenPath):
     return enemigos
 
 # Crear la formación de enemigos
-enemigos = crearFormacionEnemigos(3, 4, "./texturas/enemigo1.png",)
+enemigos = crearFormacionEnemigos(3, 4, "./texturas/enemigo1.png")

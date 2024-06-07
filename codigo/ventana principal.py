@@ -2,7 +2,7 @@ import pygame
 from pygame import mixer
 from pygame.locals import *
 import random
-from entidades import jugador,enemigo1,enemigo2,enemigo3,enemigo4 
+from entidades import jugador,enemigos
 
 anchoVentana = 600
 altoVentana = 700
@@ -21,6 +21,11 @@ x = 0
 #similar a la funcion main() de C++
 run = True
 while run:
+
+    obtenerMouse = pygame.mouse.get_pos
+    #menuTexto = g
+
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -45,13 +50,19 @@ while run:
             jugador.proyectiles.remove(proyectil)
             jugador.puedeDisparar = True
 
+    # Mover enemigos
+    for enemigo in enemigos:
+        enemigo.mover()
 
-    # Dibujar el jugador en la ventana
+        # Dibujar todo
+    ventana.blit(fondo,(0,0))
     ventana.blit(jugador.imagen, (jugador.x, jugador.y))
-    ventana.blit(enemigo1.imagen, (enemigo1.x, enemigo1.y))
-    ventana.blit(enemigo2.imagen, (enemigo2.x, enemigo2.y))
-    ventana.blit(enemigo3.imagen, (enemigo3.x, enemigo3.y))
-    ventana.blit(enemigo4.imagen, (enemigo4.x, enemigo4.y))
+    for proyectil in jugador.proyectiles:
+        ventana.blit(proyectil.imagen, (proyectil.x, proyectil.y))
+    for enemigo in enemigos:
+        ventana.blit(enemigo.imagen, (enemigo.x, enemigo.y))
+    # Variables para la posición inicial de los enemigos y el espacio entre ellos
+
     pygame.display.update()
 
 pygame.quit()

@@ -6,13 +6,12 @@ import random
 pygame.init()
 
 # Constantes
-
 nuevoAncho = 100
 nuevoAlto = 100
 anchoPantalla = 800
 altoPantalla = 600
 
-intervalo_disparo = 500  # Intervalo de tiempo entre disparos en milisegundos
+intervaloDisparo = 500  # Intervalo de tiempo entre disparos en milisegundos
 
 #-------------------------------------------
 # Clase base Entidad
@@ -35,8 +34,8 @@ class Entidad(pygame.sprite.Sprite):
 class Proyectil(Entidad):
     def __init__(self, x, y):
         super().__init__(x, y, velocidad=7, vida=1)  # Llama al constructor de la clase base
-        self.ancho = nuevoAncho //2
-        self.alto = nuevoAlto //2
+        self.ancho = nuevoAncho // 2
+        self.alto = nuevoAlto // 2
         self.imagen = pygame.image.load("./texturas/proyectil1.png")
         self.imagen = pygame.transform.scale(self.imagen, (self.ancho, self.alto))
 
@@ -53,7 +52,7 @@ class Proyectil(Entidad):
 # Clase Jugador que hereda de Entidad
 class Jugador(Entidad):
     def __init__(self, imagenPath):
-        super().__init__(x=300, y=500, velocidad=5, vida=100)  # Llama al constructor de la clase base
+        super().__init__(x=300, y=500, velocidad=4, vida=100)  # Llama al constructor de la clase base
         imagenOriginal = pygame.image.load(imagenPath)
         self.imagen = pygame.transform.scale(imagenOriginal, (nuevoAncho, nuevoAlto))
         self.ancho = self.imagen.get_width()
@@ -63,7 +62,7 @@ class Jugador(Entidad):
 
     def disparar(self):
         tiempo_actual = pygame.time.get_ticks()
-        if tiempo_actual - self.ultimo_disparo > intervalo_disparo:
+        if tiempo_actual - self.ultimo_disparo > intervaloDisparo:
             proyectil = Proyectil(self.x + self.ancho // 2 - 10, self.y)
             self.proyectiles.append(proyectil)
             self.ultimo_disparo = tiempo_actual
@@ -100,21 +99,61 @@ class Enemigo(Entidad):
                 self.x = 0
             if self.x + self.ancho > anchoPantalla:
                 self.x = anchoPantalla - self.ancho
+                
+# Clase Jefe que hereda de Entidad
+class Jefe(Entidad):
+    def __init__(self, x, y, imagenPath, velocidad, vida):
+        super().__init__(x, y, velocidad, vida)  # Llama al constructor de la clase base
+        imagenOriginal = pygame.image.load(imagenPath)
+        self.imagen = pygame.transform.scale(imagenOriginal, (nuevoAncho * 2, nuevoAlto * 2))  # Tamaño mayor
+        self.ancho = self.imagen.get_width()
+        self.alto = self.imagen.get_height()
+        self.direccion = 1  # 1 significa moviéndose a la derecha, -1 significa moviéndose a la izquierda
+        self.ultimo_disparo = pygame.time.get_ticks()
+        self.intervalo_disparo = 1000  # Intervalo de tiempo entre disparos en milisegundos
+
+    def mover(self):
+        self.x += self.velocidad * self.direccion
+        if self.x <= 0 or self.x + self.ancho >= anchoPantalla:
+            self.direccion *= -1
+            self.y += self.alto // 2  # Mueve al jefe hacia abajo cuando cambia de dirección
+            if self.x < 0:
+                self.x = 0
+            if self.x + self.ancho > anchoPantalla:
+                self.x = anchoPantalla - self.ancho
+
+    def disparar(self):
+        tiempo_actual = pygame.time.get_ticks()
+        if tiempo_actual - self.ultimo_disparo > self.intervalo_disparo:
+            # Aquí puedes definir el comportamiento de disparo del jefe, como crear proyectiles
+            print("El jefe está disparando")
+            self.ultimo_disparo = tiempo_actual
+
 
 #-------------------------------------------
 
 # Crear una formación de enemigos en cuadrícula
-def crearFormacionEnemigos(filas, columnas, imagenPath):
+def crearFormacionEnemigos(filas, columnas, imagenPaths):
     enemigos = []
-    paddingX = 3
-    paddingY = 3
+    paddingX = 20  # Aumentar el espacio horizontal entre enemigos
+    paddingY = 20  # Aumentar el espacio vertical entre enemigos
     for fila in range(filas):
         for columna in range(columnas):
             x = columna * (nuevoAncho + paddingX)
             y = fila * (nuevoAlto + paddingY)
-            enemigo = Enemigo(x, y, imagenPath, velocidad=1, vida=100)
+            index = fila * columnas + columna
+            imagen_path = imagenPaths[index % len(imagenPaths)]
+            enemigo = Enemigo(x, y, imagen_path, velocidad=1, vida=100)
             enemigos.append(enemigo)
     return enemigos
 
+# Lista de rutas de imágenes de enemigos
+tipos_enemigos = [
+    "./texturas/enemigo1.png",
+    "./texturas/enemigo2.png",
+    "./texturas/enemigo3.png",
+    "./texturas/enemigo4.png"
+]
+
 # Crear la formación de enemigos
-enemigos = crearFormacionEnemigos(3, 4, "./texturas/enemigo1.png")
+enemigos = crearFormacionEnemigos(3, 4, tipos_enemigos)
